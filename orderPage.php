@@ -124,6 +124,7 @@
 				<div class="neworderheader">
 					<div style="height: 0.5rem;margin-top: 0.1rem;">
 						<div class="neworderbtn save">保存</div>
+						<div class="neworderbtn getMoney" style="float: left;margin-left: 0.3rem;">获取余额</div>
 						<div class="ordertime" style="color: red; font-weight: bold;float: left;margin-left: 0;display: none;">00</div>
 						<div class="neworderbtn check" style="display: none;">审核</div>
 					</div>
@@ -131,20 +132,20 @@
 						<span>客户：</span><span class="customerName">客户名</span>
 					</div>
 					<div class="neworderdiv balance">
-						<span>客户余额：</span><span class="money"></span>
+						<span>客户余额：</span><span class="money">0.00</span>
 					</div>
 					<div class="neworderdiv balance">
-						<span>信用额度：</span><span class="creditMoney"></span>
+						<span>信用额度：</span><span class="creditMoney">0.00</span>
 					</div>
 					<div class="neworderdiv balance">
-						<span>已占用金额：</span><span class="UseingMoney">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;&nbsp;&nbsp;&nbsp;
-						<span>可用余额：</span><span class="balanceMoney">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+						<span>已占用金额：</span><span class="UseingMoney">0.00</span>&nbsp;&nbsp;&nbsp;&nbsp;
+						<span>可用余额：</span><span class="balanceMoney">0.00</span>
 					</div>
 					<div class="neworderdiv jgcBalance">
-						<span>加工厂返利余额：</span><span class="money"></span>
+						<span>加工厂返利余额：</span><span class="money">0.00</span>
 					</div>
 					<div class="neworderdiv tzcBalance">
-						<span>屠宰厂返利余额：</span><span class="money"></span>
+						<span>屠宰厂返利余额：</span><span class="money">0.00</span>
 					</div>
 					<div class="neworderdiv balance">
 						<p class="remarkName">备注：</p><p class="remark"></p>
@@ -156,7 +157,7 @@
 					<div class="neworderdiv detail" style="margin-top: 0.4rem;">
 						<span>总数量</span><span class="num">0</span>
 						<!--<span>总金额</span><span>¥</span><span class="jine">0.00</span>-->
-						<div class="neworderbtn addInventory">添加存货</div>
+						<div class="neworderbtn addInventory" style="z-index: 10000;">添加存货</div>
 					</div>
 				</div>
 				<div class="neworderfooter">
@@ -246,6 +247,7 @@
 	</body>
 	<script src="js/efid.js" type="text/javascript" charset="utf-8"></script>
 	<script src="js/publicJs.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/cache.js" type="text/javascript" charset="utf-8"></script>
 	<script>
 		$(".footer").innerHeight(0.068 * window.innerHeight);
 		$(".neworderform").innerHeight(0.86 * window.innerHeight);
@@ -255,18 +257,22 @@
 		$(".headBox").innerHeight(0.20 * window.innerHeight);
 		$(".footBox").innerHeight(0.55 * window.innerHeight);
 		
-		//信用额度
-		$(".creditMoney")[0].innerText = sessionStorage.getItem("creditMoney");
-		//客户余额
-		$(".money")[0].innerText = sessionStorage.getItem("money");
-		//已占用金额
-		$(".UseingMoney")[0].innerText = sessionStorage.getItem("UseingMoney");
-		//可用余额
-		$(".balanceMoney")[0].innerText = sessionStorage.getItem("balanceMoney");
-		//加工厂返利余额
-		$(".jgcBalance .money")[0].innerText = sessionStorage.getItem("jgcBalance");
-		//屠宰场返利余额
-		$(".tzcBalance .money")[0].innerText = sessionStorage.getItem("tzcBalance");
+		$(".getMoney").click(function () {
+			getMoney();
+			//信用额度
+			$(".creditMoney")[0].innerText = sessionStorage.getItem("creditMoney");
+			//客户余额
+			$(".money")[0].innerText = sessionStorage.getItem("money");
+			//已占用金额
+			$(".UseingMoney")[0].innerText = sessionStorage.getItem("UseingMoney");
+			//可用余额
+			$(".balanceMoney")[0].innerText = sessionStorage.getItem("balanceMoney");
+			//加工厂返利余额
+			$(".jgcBalance .money")[0].innerText = sessionStorage.getItem("jgcBalance");
+			//屠宰场返利余额
+			$(".tzcBalance .money")[0].innerText = sessionStorage.getItem("tzcBalance");
+		});
+		
 		//		事件
 		$(".accountChecking")[0].addEventListener('touchstart', accountChecking, false);
 
@@ -287,15 +293,16 @@
 			});
 			$("textarea").val($(".remark").html());
 		}
-		$(".remarkBtn")[0].addEventListener('touchstart', remarkBtn, false);
-
-		function remarkBtn(e) {
-			$(".addRemark").css({
-				display:"none"
-			});
-			$(".remark").html($("textarea").val());
-			
-		}
+//		$(".remarkBtn")[0].addEventListener('touchstart', remarkBtn, false);
+		$(".remarkBtn").click(
+			function remarkBtn(e) {
+				$(".addRemark").css({
+					display:"none"
+				});
+				$(".remark").html($("textarea").val());
+			}
+		);
+		
 		
 		
 		//		新建订单
@@ -323,107 +330,122 @@
 		var month = ("0" + (now.getMonth() + 1)).slice(-2);
 		var today = now.getFullYear() + "-" + (month) + "-" + (day);
 		$(".dhDateBox .dhDate").val(today);
+		$(".dhDate input").val(today);
 		
 		
-		
-		$(".reviseWrap .numcancel")[0].addEventListener('touchstart', numcancel, false);
-
-		function numcancel(e) {
-			$(".reviseWrap").css({
-				display: "none"
-			});
-			$(".reviseWrap input").val("");
-			$(".reviseCount .goodInfo").remove();
-			$(".reviseCount .priceInfo").remove();
-		}
-		var count = 0;
-		var $inputwrapper = $('.countBox');
-	    $inputwrapper.find('input').on('input propertychange',function() {
-			var result = $(this).val();
-	        count = result;
-	    });
-	    $(".reviseWrap .numsure")[0].addEventListener('touchstart', numsure, false);
-		function numsure(e) {
-				issave = true;
-				$(".reviseWrap input").val("");
-				var allPEl = document.querySelectorAll(".reviseCount .goodInfo");
+//		$(".reviseWrap .numcancel")[0].addEventListener('touchstart', numcancel, false);
+		$(".reviseWrap .numcancel").click(
+			function numcancel(e) {
 				$(".reviseWrap").css({
 					display: "none"
 				});
-				if(count != 0) {
-					$(".footerWindow").append("<div class='listBox'><p class='standard' style='width: 3.5rem;'>" + allPEl[0].innerHTML + "</p><p class='count' style='width:2rem'>" + count + "</p><p class='goodName'>" + allPEl[1].innerHTML + "</p><p class='delList' style='width:0.8rem;height:0.4rem;font-size:0.3rem;border: 0.01rem solid black;position: absolute;top: 0.25rem;right: 0.2rem;line-height: 0.4rem;'>删除</p></div>");
-				} else {
-					alert("商品数量不能为0");
-				}
+				$(".reviseWrap input").val("");
 				$(".reviseCount .goodInfo").remove();
-		}
-
-		$(".sure")[0].addEventListener('touchstart', sure, false);
-
-		function sure(e) {
-			$(".seachWrap").css({
-				display: "none"
-			});
-			var lists = document.querySelectorAll(".listBox");
-			var goodInfoEl = document.querySelectorAll(".reviseWrap1 .goodInfo");
-			
-			var index;
-			for(var i = 0; i < lists.length; i++) {
-				lists[i].onclick = function() {
-					index = $(this).index();
-					$(".reviseWrap1").css({
-						display: "block"
-					});
-					goodInfoEl[0].innerHTML = this.children[0].innerHTML;
-					goodInfoEl[1].innerHTML = this.children[1].innerHTML;
-					$(".reviseWrap1 input").val(this.children[2].innerHTML);
-				}
+				$(".reviseCount .priceInfo").remove();
 			}
+		);
 
-			function addFun() {
-				var count = 0;
-				for(var i = 0; i < lists.length; i++) {
-					count = count + parseFloat(lists[i].children[1].innerHTML);
-				}
-				$(".neworderheader .detail .num")[0].innerHTML = count;
-			}
-			addFun();
-			$(".reviseWrap1 .numcancel1")[0].addEventListener('touchstart', numcancel1, false);
-			function numcancel1(e) {
-				$(".reviseWrap1").css({
-					display: "none"
-				})
-			}
-			$(".reviseWrap1 .numsure1")[0].addEventListener('touchstart', numsure1, false);
-
-			function numsure1(e) {
-				issave = true;
-				if($(".reviseWrap1 input").val() != 0) {
-					$(".reviseWrap1").css({
+		
+		var addcount = 0;
+		var $inputwrapper = $('.countBox');
+	    $inputwrapper.find('input').on('input propertychange',function() {
+			var result = $(this).val();
+	        addcount = result;
+	    });
+//	    $(".reviseWrap .numsure")[0].addEventListener('touchstart', numsure, false);
+	    $(".reviseWrap .numsure").click(
+		    function numsure(e) {
+					issave = true;
+					$(".reviseWrap input").val("");
+					var allPEl = document.querySelectorAll(".reviseCount .goodInfo");
+					$(".reviseWrap").css({
 						display: "none"
 					});
-					var newCount = document.querySelectorAll(".count");
-					newCount[index].innerHTML = $(".reviseWrap1 input").val();
-				} else {
-					alert("商品数量不能为0");
-				}
-				addFun();
+					if(addcount != 0) {
+						$(".footerWindow").append("<div class='listBox'><p class='standard' style='width: 3.5rem;'>" + allPEl[0].innerHTML + "</p><p class='count' style='width:2rem'>" + addcount + "</p><p class='goodName'>" + allPEl[1].innerHTML + "</p><p class='delList' style='width:0.8rem;height:0.4rem;font-size:0.3rem;border: 0.01rem solid black;position: absolute;top: 0.25rem;right: 0.2rem;line-height: 0.4rem;'>删除</p></div>");
+						addcount = 0;
+					} else {
+						alert("商品数量不能为0");
+					}
+					$(".reviseCount .goodInfo").remove();
 			}
-			var delListEl = document.querySelectorAll(".delList");
-			for (var i=0;i<delListEl.length;i++) {
-				delListEl[i].addEventListener('touchstart', delList, false);
-				function delList (e) {
-					e.preventDefault();
-					this.parentNode.remove();
-					var lists = document.querySelectorAll(".listBox");
+	    );
+		
+
+//		$(".sure")[0].addEventListener('touchstart', sure, false);
+		$(".sure").click(
+			function sure(e) {
+				$(".seachWrap").css({
+					display: "none"
+				});
+				var lists = document.querySelectorAll(".listBox");
+				var goodInfoEl = document.querySelectorAll(".reviseWrap1 .goodInfo");
+				
+				var index;
+				for(var i = 0; i < lists.length; i++) {
+					lists[i].onclick = function() {
+						index = $(this).index();
+						$(".reviseWrap1").css({
+							display: "block"
+						});
+						goodInfoEl[0].innerHTML = this.children[0].innerHTML;
+						goodInfoEl[1].innerHTML = this.children[2].innerHTML;
+						$(".reviseWrap1 input").val(this.children[1].innerHTML);
+					}
+				}
+	
+				function addFun() {
 					var count = 0;
 					for(var i = 0; i < lists.length; i++) {
 						count = count + parseFloat(lists[i].children[1].innerHTML);
 					}
 					$(".neworderheader .detail .num")[0].innerHTML = count;
 				}
+				addFun();
+//				$(".reviseWrap1 .numcancel1")[0].addEventListener('touchstart', numcancel1, false);
+				$(".reviseWrap1 .numcancel1").click(
+					function numcancel1(e) {
+						$(".reviseWrap1").css({
+							display: "none"
+						})
+					}
+				);
+				
+//				$(".reviseWrap1 .numsure1")[0].addEventListener('touchstart', numsure1, false);
+				$(".reviseWrap1 .numsure1").click(
+					function numsure1(e) {
+						issave = true;
+						if($(".reviseWrap1 input").val() != 0) {
+							$(".reviseWrap1").css({
+								display: "none"
+							});
+							var newCount = document.querySelectorAll(".count");
+							newCount[index].innerHTML = $(".reviseWrap1 input").val();
+						} else {
+							alert("商品数量不能为0");
+						}
+						addFun();
+					}
+				);
+				
+				var delListEl = document.querySelectorAll(".delList");
+				for (var i=0;i<delListEl.length;i++) {
+					delListEl[i].addEventListener('touchstart', delList, false);
+					function delList (e) {
+						e.preventDefault();
+						this.parentNode.remove();
+						var lists = document.querySelectorAll(".listBox");
+						var count = 0;
+						for(var i = 0; i < lists.length; i++) {
+							count = count + parseFloat(lists[i].children[1].innerHTML);
+						}
+						$(".neworderheader .detail .num")[0].innerHTML = count;
+					}
+				}
 			}
-		}
+		);
+
+		
 		function timeCtl () {
 			var time = now.getHours();
 			//		获取开放时间
@@ -486,7 +508,6 @@
 										$(".check").css({
 											display: "block"
 										});
-										
 										$(".headMenu .newOrder")[0].innerHTML = "审核订单";
 									}
 								});
@@ -507,7 +528,7 @@
 					display:"block"
 				});
 				$(".btnType").html("审核");
-				var context = '<?xml version="1.0" encoding="utf-8"?><ufinterface  efserverid="'+efid+'" eftype="EFsql" proc="Query" efdebug="1" sqlstr="SELECT TOP 1 [id] FROM [UFDATA_'+efid+'_2015].[dbo].[V_EF_XYbase] WHERE cvouchtype=\'EFXYKZ003\' AND t_ccuscode=\'' + sessionStorage.getItem("ccuscode") + '\' order by id desc"></ufinterface>';
+				var context = '<?xml version="1.0" encoding="utf-8"?><ufinterface  efserverid="'+efid+'" eftype="EFsql" proc="Query" efdebug="1" sqlstr="SELECT TOP 1 [id] FROM [UFDATA_'+efid+'_2015].[dbo].[V_EF_XYbase] WHERE cvouchtype=\'EFXYKZ003\' AND t_ccuscode=\'' + sessionStorage.getItem("ccuscode") + '\' AND ddate=\'' + $(".dhDate input").val() + '\' order by id desc"></ufinterface>';
 				$.post("php/inventory.php", {
 					context: context
 				}, function(str) {
@@ -550,7 +571,7 @@
 								checkXmlStrDoc.async = "false";
 								checkXmlStrDoc.loadXML(str);
 							}
-							console.log(checkXmlStrDoc)
+//							console.log(checkXmlStrDoc);
 							if(checkXmlStrDoc.getElementsByTagName('ufinterface')[0].getAttribute("succeed") == "1") {
 								$(".adInfo").css({
 									display:"none"
@@ -561,7 +582,7 @@
 								$(".adInfo").css({
 									display:"none"
 								});
-								alert("审核失败");
+								alert(checkXmlStrDoc.getElementsByTagName('ufinterface')[0].getAttribute("dsc")+",审核失败");
 							}
 						});
 					});
@@ -597,33 +618,47 @@
 		pageCtl(1);
 		var pages;
 		var pagesNum;
+		var clicktag = true;
 		$(".lastPage")[0].addEventListener('touchstart', lastpage, false);
 
 		function lastpage(e) {
-			$(".footBox .mylist").remove();
-			pages = Number(sessionStorage.getItem("pages"));
-			if(pages > 1) {
-				pages = pages - 1;
+			if (clicktag == true) {
+				clicktag = false;
+				$(".footBox .mylist").remove();
+				pages = Number(sessionStorage.getItem("pages"));
+				if(pages > 1) {
+					pages = pages - 1;
+				}
+				if (dateFun == 0) {
+					pageCtl(pages);
+				} else{
+					dateQuery(pages);
+				}
+				setTimeout(function(){
+					clicktag = true;
+				},1500);
 			}
-			if (dateFun == 0) {
-				pageCtl(pages);
-			} else{
-				dateQuery(pages);
-			}
+			
 		}
 		$(".nextPage")[0].addEventListener('touchstart', nextpage, false);
-
+		
 		function nextpage(e) {
-			$(".footBox .mylist").remove();
-			pages = Number(sessionStorage.getItem("pages"));
-			pagesNum = Number(sessionStorage.getItem("pagesNum"));
-			if(pages < pagesNum) {
-				pages = pages + 1;
-			}
-			if (dateFun == 0) {
-				pageCtl(pages);
-			} else{
-				dateQuery(pages);
+			if (clicktag == true) {
+				clicktag = false;
+				$(".footBox .mylist").remove();
+				pages = Number(sessionStorage.getItem("pages"));
+				pagesNum = Number(sessionStorage.getItem("pagesNum"));
+				if(pages < pagesNum) {
+					pages = pages + 1;
+				}
+				if (dateFun == 0) {
+					pageCtl(pages);
+				} else{
+					dateQuery(pages);
+				}
+				setTimeout(function(){
+					clicktag = true;
+				},1500);
 			}
 		}
 		function pageCtl(pagenumber) {

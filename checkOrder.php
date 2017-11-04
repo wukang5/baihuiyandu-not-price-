@@ -12,6 +12,7 @@
 		<link rel="stylesheet" type="text/css" href="css/publicCss.css"/>
 		<script src="js/campatibility.js" type="text/javascript" charset="utf-8"></script>
 		<script src="js/jquery-1.12.4min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/cache.js" type="text/javascript" charset="utf-8"></script>
 		<style>
 			html,
 			body {
@@ -211,14 +212,16 @@
 			});
 			$("textarea").val($(".remark").html());
 		}
-		$(".remarkBtn")[0].addEventListener('touchstart', remarkBtn, false);
-
-		function remarkBtn(e) {
-			$(".addRemark").css({
-				display:"none"
-			});
-			$(".remark").html($("textarea").val());
-		}
+//		$(".remarkBtn")[0].addEventListener('touchstart', remarkBtn, false);
+		$(".remarkBtn").click(
+			function remarkBtn(e) {
+				$(".addRemark").css({
+					display:"none"
+				});
+				$(".remark").html($("textarea").val());
+			}
+		);
+		
 		//		事件
 		if(sessionStorage.getItem("isChecked") == "已审核") {
 			$(".headerBtn").css({
@@ -292,8 +295,8 @@
 						display: "block"
 					});
 					goodInfoEl[0].innerHTML = this.children[0].innerHTML;
-					goodInfoEl[1].innerHTML = this.children[1].innerHTML;
-					$(".reviseWrap1 input").val(this.children[2].innerHTML);
+					goodInfoEl[1].innerHTML = this.children[2].innerHTML;
+					$(".reviseWrap1 input").val(this.children[1].innerHTML);
 				}
 			}
 	
@@ -308,27 +311,31 @@
 //				$(".neworderheader .detail .jine")[0].innerHTML = sumPrice.toFixed(2);
 			}
 			addFun();
-			$(".reviseWrap1 .numcancel1")[0].addEventListener('touchstart', numcancel1, false);
-			function numcancel1(e) {
-				$(".reviseWrap1").css({
-					display: "none"
-				})
-			}
-			$(".reviseWrap1 .numsure1")[0].addEventListener('touchstart', numsure1, false);
-
-			function numsure1(e) {
-				issave = true;
-				if($(".reviseWrap1 input").val() != 0) {
+//			$(".reviseWrap1 .numcancel1")[0].addEventListener('touchstart', numcancel1, false);
+			$(".reviseWrap1 .numcancel1").click(
+				function numcancel1(e) {
 					$(".reviseWrap1").css({
 						display: "none"
-					});
-					var newCount = document.querySelectorAll(".count");
-					newCount[index].innerHTML = $(".reviseWrap1 input").val();
-				} else {
-					alert("商品数量不能为0");
+					})
 				}
-				addFun();
-			}
+			);
+			
+//			$(".reviseWrap1 .numsure1")[0].addEventListener('touchstart', numsure1, false);
+			$(".reviseWrap1 .numsure1").click(
+				function numsure1(e) {
+					issave = true;
+					if($(".reviseWrap1 input").val() != 0) {
+						$(".reviseWrap1").css({
+							display: "none"
+						});
+						var newCount = document.querySelectorAll(".count");
+						newCount[index].innerHTML = $(".reviseWrap1 input").val();
+					} else {
+						alert("商品数量不能为0");
+					}
+					addFun();
+				}
+			);
 		}
 		$(".pageItem .back")[0].addEventListener('touchstart', back, false);
 
@@ -336,61 +343,69 @@
 			window.location.href = "orderPage.php";
 		}
 		
-		$(".reviseWrap .numcancel")[0].addEventListener('touchstart', numcancel, false);
-
-		function numcancel(e) {
-			$(".reviseWrap").css({
-				display: "none"
-			});
-			$(".reviseWrap input").val("");
-			$(".reviseCount .goodInfo").remove();
-			$(".reviseCount .priceInfo").remove();
-		}
-		var count = 0;
-		var $inputwrapper = $('.countBox');
-	    $inputwrapper.find('input').on('input propertychange',function() {
-			var result = $(this).val();
-	        count = result;
-	    });
-	    $(".reviseWrap .numsure")[0].addEventListener('touchstart', numsure, false);
-		function numsure(e) {
-				issave = true;
-				$(".reviseWrap input").val("");
-				var allPEl = document.querySelectorAll(".reviseCount .goodInfo");
+//		$(".reviseWrap .numcancel")[0].addEventListener('touchstart', numcancel, false);
+		$(".reviseWrap .numcancel").click(
+			function numcancel(e) {
 				$(".reviseWrap").css({
 					display: "none"
 				});
-				if(count != 0) {
-					$(".footerWindow").append("<div class='listBox'><p class='standard'>" + allPEl[0].innerHTML + "</p><p class='count'>" + count + "</p><p class='goodName'>" + allPEl[1].innerHTML + "</p><p class='delList' style='width:0.8rem;height:0.4rem;font-size:0.3rem;border: 0.01rem solid black;position: absolute;top: 0.25rem;right: 0.2rem;line-height: 0.4rem;'>删除</p></div>");
-				} else {
-					alert("商品数量不能为0");
-				}
+				$(".reviseWrap input").val("");
 				$(".reviseCount .goodInfo").remove();
-		}
+				$(".reviseCount .priceInfo").remove();
+			}
+		);
 
-		$(".sure")[0].addEventListener('touchstart', sure, false);
-
-		function sure(e) {
-			$(".search input").val("");
-			$(".seachWrap").css({
-				display: "none"
-			});
-			updataCount();
-			var delListEl = document.querySelectorAll(".delList");
-			for (var i=0;i<delListEl.length;i++) {
-				delListEl[i].addEventListener('touchstart', delList, false);
-				function delList (e) {
-					e.preventDefault();
-					this.parentNode.remove();
-					var lists = document.querySelectorAll(".listBox");
-					var count = 0;
-					for(var i = 0; i < lists.length; i++) {
-						count = count + parseFloat(lists[i].children[4].innerHTML);
+		
+		var addcount = 0;
+		var $inputwrapper = $('.countBox');
+	    $inputwrapper.find('input').on('input propertychange',function() {
+			var result = $(this).val();
+	        addcount = result;
+	    });
+//	    $(".reviseWrap .numsure")[0].addEventListener('touchstart', numsure, false);
+	    $(".reviseWrap .numsure").click(
+		    function numsure(e) {
+					issave = true;
+					$(".reviseWrap input").val("");
+					var allPEl = document.querySelectorAll(".reviseCount .goodInfo");
+					$(".reviseWrap").css({
+						display: "none"
+					});
+					if(addcount != 0) {
+						$(".footerWindow").append("<div class='listBox'><p class='standard'>" + allPEl[0].innerHTML + "</p><p class='count'>" + addcount + "</p><p class='goodName'>" + allPEl[1].innerHTML + "</p><p class='delList' style='width:0.8rem;height:0.4rem;font-size:0.3rem;border: 0.01rem solid black;position: absolute;top: 0.25rem;right: 0.2rem;line-height: 0.4rem;'>删除</p></div>");
+						addcount = 0;
+					} else {
+						alert("商品数量不能为0");
 					}
-					$(".neworderheader .detail .num")[0].innerHTML = count;
+					$(".reviseCount .goodInfo").remove();
+			}
+	    );
+		
+
+//		$(".sure")[0].addEventListener('touchstart', sure, false);
+		$(".sure").click(
+			function sure(e) {
+				$(".search input").val("");
+				$(".seachWrap").css({
+					display: "none"
+				});
+				updataCount();
+				var delListEl = document.querySelectorAll(".delList");
+				for (var i=0;i<delListEl.length;i++) {
+					delListEl[i].addEventListener('touchstart', delList, false);
+					function delList (e) {
+						e.preventDefault();
+						this.parentNode.remove();
+						var lists = document.querySelectorAll(".listBox");
+						var count = 0;
+						for(var i = 0; i < lists.length; i++) {
+							count = count + parseFloat(lists[i].children[4].innerHTML);
+						}
+						$(".neworderheader .detail .num")[0].innerHTML = count;
+					}
 				}
 			}
-		}
+		);
 		
 		var isCheck = 0;// 判断运行哪个审核
 		$(".save")[0].addEventListener('touchstart', save, false);
@@ -452,7 +467,7 @@
 							display:"block"
 						});
 						$(".btnType").html("审核");
-						var context = '<?xml version="1.0" encoding="utf-8"?><ufinterface  efserverid="'+efid+'" eftype="EFsql" proc="Query" efdebug="1" sqlstr="SELECT TOP 1 [id] FROM [UFDATA_'+efid+'_2015].[dbo].[V_EF_XYbase] WHERE cvouchtype=\'EFXYKZ003\' AND t_ccuscode=\'' + sessionStorage.getItem("ccuscode") + '\' order by id desc"></ufinterface>';
+						var context = '<?xml version="1.0" encoding="utf-8"?><ufinterface  efserverid="'+efid+'" eftype="EFsql" proc="Query" efdebug="1" sqlstr="SELECT TOP 1 [id] FROM [UFDATA_'+efid+'_2015].[dbo].[V_EF_XYbase] WHERE cvouchtype=\'EFXYKZ003\' AND t_ccuscode=\'' + sessionStorage.getItem("ccuscode") + '\' AND ddate=\'' + $(".dhDate input").val() + '\' order by id desc"></ufinterface>';
 						$.post("php/inventory.php", {
 							context: context
 						}, function(str) {
@@ -507,7 +522,7 @@
 										$(".adInfo").css({
 											display:"none"
 										});
-										alert("审核失败");
+										alert(checkXmlStrDoc.getElementsByTagName('ufinterface')[0].getAttribute("succeed")+",审核失败");
 									}
 								});
 							});
@@ -562,8 +577,8 @@
 								checkXmlStrDoc.async = "false";
 								checkXmlStrDoc.loadXML(str);
 							}
-//							console.log(checkXmlStrDoc);
-							if(checkXmlStrDoc.getElementsByTagName('ufinterface')[0].getAttribute("succeed") == "1") {
+							console.log(checkXmlStrDoc);
+							if(checkXmlStrDoc.getElementsByTagName('ufinterface')[0].getAttribute("dsc") == "1") {
 								alert("审核成功");
 								$(".adInfo").css({
 									display:"none"
@@ -573,7 +588,7 @@
 								$(".adInfo").css({
 									display:"none"
 								});
-								alert("审核失败");
+								alert(checkXmlStrDoc.getElementsByTagName('ufinterface')[0].getAttribute("dsc")+",审核失败");
 							}
 						});
 					});

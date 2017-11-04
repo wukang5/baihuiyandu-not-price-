@@ -16,6 +16,7 @@
 
 .neworderform .save,
 .neworderform .check,
+.getMoney,
 .lastPage,
 .nextPage {
 	float: left;

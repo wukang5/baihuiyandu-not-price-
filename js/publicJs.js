@@ -9,43 +9,14 @@ var month = ("0" + (now.getMonth() + 1)).slice(-2);
 var today = now.getFullYear() + "-" + (month) + "-" + (day);
 var foodsIndex;
 
-var xyedSum = 0; //信用额度
-if(!sessionStorage.creditMoney || sessionStorage.creditMoney == "") {
+function getMoney() {
+	var xyedSum = 0; //信用额度
+	if(!sessionStorage.creditMoney || sessionStorage.creditMoney == "") {
 
-	var xyed = '<?xml version="1.0" encoding="utf-8"?><ufinterface  efserverid="' + efid + '" eftype="EFsql" sqlstr="select iCusCreLine from Customer where isnull(cCusCode,\'\') = \'' + sessionStorage.getItem("cInvoiceCompany") + '\'" proc="Query" efdebug="1"  ></ufinterface>';
-
-	$.post("php/inventory.php", {
-		context: xyed
-	}, function(str) {
-		var xmlStrDoc = null;
-		if(window.DOMParser) { // Mozilla Explorer 
-			parser = new DOMParser();
-			xmlStrDoc = parser.parseFromString(str, "text/xml");
-		} else { // Internet Explorer 
-			xmlStrDoc = new ActiveXObject("Microsoft.XMLDOM");
-			xmlStrDoc.async = "false";
-			xmlStrDoc.loadXML(str);
-		}
-		xyedSum = xmlStrDoc.getElementsByTagName('head')[0].childNodes[0].getAttribute("icuscreline");
-		$(".creditMoney")[0].innerText = parseFloat(xyedSum).toFixed(2);
-		sessionStorage.setItem("creditMoney", parseFloat(xyedSum).toFixed(2));
-		if(xmlStrDoc.getElementsByTagName('ufinterface')[0].getAttribute("succeed") == "1") {
-			xxyeFun();
-		}
-	});
-}
-
-function xxyeFun() {
-	//信用余额
-	var farsum = 0;
-	var fDLSum = 0;
-	var fBLSum = 0;
-	if(!sessionStorage.money || !sessionStorage.UseingMoney || !sessionStorage.balanceMoney || sessionStorage.money == "" || sessionStorage.UseingMoney == "" || sessionStorage.balanceMoney == "") {
-
-		var xyye = '<?xml version="1.0" encoding="utf-8"?><ufinterface  efserverid="' + efid + '" eftype="EFsql" sqlstr="select farsum,fDLSum,fBLSum from SA_CreditSum where isnull(cCusCode,\'\') = \'' + sessionStorage.getItem("cInvoiceCompany") + '\'" proc="Query" efdebug="1"  ></ufinterface>';
+		var xyed = '<?xml version="1.0" encoding="utf-8"?><ufinterface  efserverid="' + efid + '" eftype="EFsql" sqlstr="select iCusCreLine from Customer where isnull(cCusCode,\'\') = \'' + sessionStorage.getItem("cInvoiceCompany") + '\'" proc="Query" efdebug="1"  ></ufinterface>';
 
 		$.post("php/inventory.php", {
-			context: xyye
+			context: xyed
 		}, function(str) {
 			var xmlStrDoc = null;
 			if(window.DOMParser) { // Mozilla Explorer 
@@ -56,94 +27,140 @@ function xxyeFun() {
 				xmlStrDoc.async = "false";
 				xmlStrDoc.loadXML(str);
 			}
-			var farsum = xmlStrDoc.getElementsByTagName('head')[0].childNodes[0].getAttribute("farsum");
-			var fDLSum = xmlStrDoc.getElementsByTagName('head')[0].childNodes[0].getAttribute("fdlsum");
-			var fBLSum = xmlStrDoc.getElementsByTagName('head')[0].childNodes[0].getAttribute("fblsum");
+			xyedSum = xmlStrDoc.getElementsByTagName('head')[0].childNodes[0].getAttribute("icuscreline");
+			$(".creditMoney")[0].innerText = parseFloat(xyedSum).toFixed(2);
+			sessionStorage.setItem("creditMoney", parseFloat(xyedSum).toFixed(2));
+			if(xmlStrDoc.getElementsByTagName('ufinterface')[0].getAttribute("succeed") == "1") {
+				xxyeFun();
+			}
+		});
+	}
 
-			$(".money")[0].innerText = parseFloat(-1 * farsum - fBLSum).toFixed(2);
-			sessionStorage.setItem("money", parseFloat(-1 * farsum - fBLSum).toFixed(2));
-			$(".UseingMoney")[0].innerText = parseFloat(fDLSum).toFixed(2);
-			sessionStorage.setItem("UseingMoney", parseFloat(fDLSum).toFixed(2));
-			$(".balanceMoney")[0].innerText = parseFloat(-1 * farsum - fBLSum - fDLSum + parseFloat(xyedSum)).toFixed(2);
-			sessionStorage.setItem("balanceMoney", parseFloat(-1 * farsum - fBLSum - fDLSum + parseFloat(xyedSum)).toFixed(2));
+	function xxyeFun() {
+		var fDLSum = 0;
+		var fSOSum = 0;
+		var useingSum = 0;
+		if(!sessionStorage.UseingMoney || sessionStorage.UseingMoney == "") {
+			var yzyje = '<?xml version="1.0" encoding="utf-8"?><ufinterface  efserverid="' + efid + '" eftype="EFsql" sqlstr="select farsum,fDLSum,fBLSum,fSOSum from SA_CreditSum where isnull(cCusCode,\'\') = \'' + sessionStorage.getItem("ccuscode") + '\'" proc="Query" efdebug="1"  ></ufinterface>';
+			$.post("php/inventory.php", {
+				context: yzyje
+			}, function(str) {
+				var xmlStrDoc = null;
+				if(window.DOMParser) { // Mozilla Explorer 
+					parser = new DOMParser();
+					xmlStrDoc = parser.parseFromString(str, "text/xml");
+				} else { // Internet Explorer 
+					xmlStrDoc = new ActiveXObject("Microsoft.XMLDOM");
+					xmlStrDoc.async = "false";
+					xmlStrDoc.loadXML(str);
+				}
+				var fDLSum = xmlStrDoc.getElementsByTagName('head')[0].childNodes[0].getAttribute("fdlsum");
+				var fSOSum = xmlStrDoc.getElementsByTagName('head')[0].childNodes[0].getAttribute("fsosum");
+				useingSum = (Number(fDLSum) + Number(fSOSum)).toFixed(2);
+				$(".UseingMoney")[0].innerText = useingSum;
+				sessionStorage.setItem("UseingMoney", useingSum);
+				if(xmlStrDoc.getElementsByTagName('ufinterface')[0].getAttribute("succeed") == "1") {
+					//信用余额
+					var farsum = 0;
+					var fBLSum = 0;
+					if(!sessionStorage.money || !sessionStorage.UseingMoney || !sessionStorage.balanceMoney || sessionStorage.money == "" || sessionStorage.UseingMoney == "" || sessionStorage.balanceMoney == "") {
+
+						var xyye = '<?xml version="1.0" encoding="utf-8"?><ufinterface  efserverid="' + efid + '" eftype="EFsql" sqlstr="select farsum,fDLSum,fBLSum,fSOSum from SA_CreditSum where isnull(cCusCode,\'\') = \'' + sessionStorage.getItem("cInvoiceCompany") + '\'" proc="Query" efdebug="1"  ></ufinterface>';
+
+						$.post("php/inventory.php", {
+							context: xyye
+						}, function(str) {
+							var xmlStrDoc = null;
+							if(window.DOMParser) { // Mozilla Explorer 
+								parser = new DOMParser();
+								xmlStrDoc = parser.parseFromString(str, "text/xml");
+							} else { // Internet Explorer 
+								xmlStrDoc = new ActiveXObject("Microsoft.XMLDOM");
+								xmlStrDoc.async = "false";
+								xmlStrDoc.loadXML(str);
+							}
+							var farsum = xmlStrDoc.getElementsByTagName('head')[0].childNodes[0].getAttribute("farsum");
+							var fBLSum = xmlStrDoc.getElementsByTagName('head')[0].childNodes[0].getAttribute("fblsum");
+							$(".money")[0].innerText = parseFloat(-1 * farsum - fBLSum).toFixed(2);
+							sessionStorage.setItem("money", parseFloat(-1 * farsum - fBLSum).toFixed(2));
+							$(".balanceMoney")[0].innerText = parseFloat(-1 * farsum - fBLSum - useingSum + parseFloat(xyedSum)).toFixed(2);
+							sessionStorage.setItem("balanceMoney", parseFloat(-1 * farsum - fBLSum - useingSum + parseFloat(xyedSum)).toFixed(2));
+						});
+					}
+				}
+			});
+		}
+	}
+	if(!sessionStorage.jgcBalance || !sessionStorage.jgcBalance) {
+		//加工厂返利余额
+		var JGCrebate;
+		var context1 = '<?xml version="1.0" encoding="utf-8"?><ufinterface  efserverid="' + efid + '" eftype="EFsql" sqlstr="select  sum(isnull(b_float1,0)) as b_float1  from V_List_EF_XYbase where cvouchtype=\'EFCYBH001\' and isnull(cverifier,\'\')!=\'\' and isnull(b_ccuscode,\'\')=\'' + sessionStorage.getItem("cInvoiceCompany") + '\' and isnull(b_cdepcode,\'\')=\'01020202\'" proc="Query" efdebug="1"  ></ufinterface>';
+		$.post("php/inventory.php", {
+			context: context1
+		}, function(str) {
+			var xmlStrDoc = null;
+			if(window.DOMParser) { // Mozilla Explorer 
+				parser = new DOMParser();
+				xmlStrDoc = parser.parseFromString(str, "text/xml");
+			} else { // Internet Explorer 
+				xmlStrDoc = new ActiveXObject("Microsoft.XMLDOM");
+				xmlStrDoc.async = "false";
+				xmlStrDoc.loadXML(str);
+			}
+			JGCrebate = xmlStrDoc.getElementsByTagName('head')[0].childNodes[0].getAttribute("b_float1");
+			var context2 = '<?xml version="1.0" encoding="utf-8"?><ufinterface  efserverid="' + efid + '" eftype="EFsql" sqlstr="select sum(isnull(Cast(cdefine25 as numeric(16,2)),0)) as aa from SaleBillVouchZT inner join SaleBillVouchZW  on SaleBillVouchZT.sbvid=SaleBillVouchZW.sbvid where ccuscode=\'' + sessionStorage.getItem("cInvoiceCompany") + '\' and cdepcode=\'01020202\'" proc="Query" efdebug="1"  ></ufinterface>';
+			$.post("php/inventory.php", {
+				context: context2
+			}, function(str) {
+				var xmlStrDoc = null;
+				if(window.DOMParser) { // Mozilla Explorer 
+					parser = new DOMParser();
+					xmlStrDoc = parser.parseFromString(str, "text/xml");
+				} else { // Internet Explorer 
+					xmlStrDoc = new ActiveXObject("Microsoft.XMLDOM");
+					xmlStrDoc.async = "false";
+					xmlStrDoc.loadXML(str);
+				}
+				$(".jgcBalance .money")[0].innerText = (JGCrebate - xmlStrDoc.getElementsByTagName('head')[0].childNodes[0].getAttribute("aa")).toFixed(2);
+				sessionStorage.setItem("jgcBalance", (JGCrebate - xmlStrDoc.getElementsByTagName('head')[0].childNodes[0].getAttribute("aa")).toFixed(2));
+			});
+		});
+	}
+	if(!sessionStorage.tzcBalance || sessionStorage.tzcBalance == "") {
+		var TZCrebate;
+		var context3 = '<?xml version="1.0" encoding="utf-8"?><ufinterface  efserverid="' + efid + '" eftype="EFsql" sqlstr="select  sum(isnull(b_float1,0)) as b_float1  from V_List_EF_XYbase where cvouchtype=\'EFCYBH001\' and isnull(cverifier,\'\')!=\'\' and isnull(b_ccuscode,\'\')=\'' + sessionStorage.getItem("cInvoiceCompany") + '\' and isnull(b_cdepcode,\'\')=\'01020905\'" proc="Query" efdebug="1"  ></ufinterface>';
+		$.post("php/inventory.php", {
+			context: context3
+		}, function(str) {
+			var xmlStrDoc = null;
+			if(window.DOMParser) { // Mozilla Explorer 
+				parser = new DOMParser();
+				xmlStrDoc = parser.parseFromString(str, "text/xml");
+			} else { // Internet Explorer 
+				xmlStrDoc = new ActiveXObject("Microsoft.XMLDOM");
+				xmlStrDoc.async = "false";
+				xmlStrDoc.loadXML(str);
+			}
+			TZCrebate = xmlStrDoc.getElementsByTagName('head')[0].childNodes[0].getAttribute("b_float1");
+			var context4 = '<?xml version="1.0" encoding="utf-8"?><ufinterface  efserverid="' + efid + '" eftype="EFsql" sqlstr="select sum(isnull(Cast(cdefine25 as numeric(16,2)),0)) as aa from SaleBillVouchZT inner join SaleBillVouchZW  on SaleBillVouchZT.sbvid=SaleBillVouchZW.sbvid where ccuscode=\'' + sessionStorage.getItem("cInvoiceCompany") + '\' and cdepcode=\'010200905\'" proc="Query" efdebug="1"  ></ufinterface>';
+			$.post("php/inventory.php", {
+				context: context4
+			}, function(str) {
+				var xmlStrDoc = null;
+				if(window.DOMParser) { // Mozilla Explorer 
+					parser = new DOMParser();
+					xmlStrDoc = parser.parseFromString(str, "text/xml");
+				} else { // Internet Explorer 
+					xmlStrDoc = new ActiveXObject("Microsoft.XMLDOM");
+					xmlStrDoc.async = "false";
+					xmlStrDoc.loadXML(str);
+				}
+				$(".tzcBalance .money")[0].innerText = (TZCrebate - xmlStrDoc.getElementsByTagName('head')[0].childNodes[0].getAttribute("aa")).toFixed(2);
+				sessionStorage.setItem("tzcBalance", (TZCrebate - xmlStrDoc.getElementsByTagName('head')[0].childNodes[0].getAttribute("aa")).toFixed(2));
+			});
 		});
 	}
 }
-if(!sessionStorage.jgcBalance || !sessionStorage.jgcBalance) {
-	//加工厂返利余额
-	$.ajaxSettings.async  =  true;
-	var JGCrebate;
-	var context1 = '<?xml version="1.0" encoding="utf-8"?><ufinterface  efserverid="' + efid + '" eftype="EFsql" sqlstr="select  sum(isnull(b_float1,0)) as b_float1  from V_List_EF_XYbase where cvouchtype=\'EFCYBH001\' and isnull(cverifier,\'\')!=\'\' and isnull(b_ccuscode,\'\')=\'' + sessionStorage.getItem("cInvoiceCompany") + '\' and isnull(b_cdepcode,\'\')=\'01020202\'" proc="Query" efdebug="1"  ></ufinterface>';
-	$.post("php/inventory.php", {
-		context: context1
-	}, function(str) {
-		var xmlStrDoc = null;
-		if(window.DOMParser) { // Mozilla Explorer 
-			parser = new DOMParser();
-			xmlStrDoc = parser.parseFromString(str, "text/xml");
-		} else { // Internet Explorer 
-			xmlStrDoc = new ActiveXObject("Microsoft.XMLDOM");
-			xmlStrDoc.async = "false";
-			xmlStrDoc.loadXML(str);
-		}
-		JGCrebate = xmlStrDoc.getElementsByTagName('head')[0].childNodes[0].getAttribute("b_float1");
-		var context2 = '<?xml version="1.0" encoding="utf-8"?><ufinterface  efserverid="' + efid + '" eftype="EFsql" sqlstr="select sum(isnull(Cast(cdefine25 as numeric(16,2)),0)) as aa from SaleBillVouchZT inner join SaleBillVouchZW  on SaleBillVouchZT.sbvid=SaleBillVouchZW.sbvid where ccuscode=\'' + sessionStorage.getItem("cInvoiceCompany") + '\' and cdepcode=\'01020202\'" proc="Query" efdebug="1"  ></ufinterface>';
-		$.post("php/inventory.php", {
-			context: context2
-		}, function(str) {
-			var xmlStrDoc = null;
-			if(window.DOMParser) { // Mozilla Explorer 
-				parser = new DOMParser();
-				xmlStrDoc = parser.parseFromString(str, "text/xml");
-			} else { // Internet Explorer 
-				xmlStrDoc = new ActiveXObject("Microsoft.XMLDOM");
-				xmlStrDoc.async = "false";
-				xmlStrDoc.loadXML(str);
-			}
-			$(".jgcBalance .money")[0].innerText = (JGCrebate - xmlStrDoc.getElementsByTagName('head')[0].childNodes[0].getAttribute("aa")).toFixed(2);
-			sessionStorage.setItem("jgcBalance", (JGCrebate - xmlStrDoc.getElementsByTagName('head')[0].childNodes[0].getAttribute("aa")).toFixed(2));
-		});
-	});
-	$.ajaxSettings.async  =  false;
-}
-if(!sessionStorage.tzcBalance || sessionStorage.tzcBalance == "") {
-	$.ajaxSettings.async  =  true;
-	var TZCrebate;
-	var context3 = '<?xml version="1.0" encoding="utf-8"?><ufinterface  efserverid="' + efid + '" eftype="EFsql" sqlstr="select  sum(isnull(b_float1,0)) as b_float1  from V_List_EF_XYbase where cvouchtype=\'EFCYBH001\' and isnull(cverifier,\'\')!=\'\' and isnull(b_ccuscode,\'\')=\'' + sessionStorage.getItem("cInvoiceCompany") + '\' and isnull(b_cdepcode,\'\')=\'01020905\'" proc="Query" efdebug="1"  ></ufinterface>';
-	$.post("php/inventory.php", {
-		context: context3
-	}, function(str) {
-		var xmlStrDoc = null;
-		if(window.DOMParser) { // Mozilla Explorer 
-			parser = new DOMParser();
-			xmlStrDoc = parser.parseFromString(str, "text/xml");
-		} else { // Internet Explorer 
-			xmlStrDoc = new ActiveXObject("Microsoft.XMLDOM");
-			xmlStrDoc.async = "false";
-			xmlStrDoc.loadXML(str);
-		}
-		TZCrebate = xmlStrDoc.getElementsByTagName('head')[0].childNodes[0].getAttribute("b_float1");
-		var context4 = '<?xml version="1.0" encoding="utf-8"?><ufinterface  efserverid="' + efid + '" eftype="EFsql" sqlstr="select sum(isnull(Cast(cdefine25 as numeric(16,2)),0)) as aa from SaleBillVouchZT inner join SaleBillVouchZW  on SaleBillVouchZT.sbvid=SaleBillVouchZW.sbvid where ccuscode=\'' + sessionStorage.getItem("cInvoiceCompany") + '\' and cdepcode=\'010200905\'" proc="Query" efdebug="1"  ></ufinterface>';
-		$.post("php/inventory.php", {
-			context: context4
-		}, function(str) {
-			var xmlStrDoc = null;
-			if(window.DOMParser) { // Mozilla Explorer 
-				parser = new DOMParser();
-				xmlStrDoc = parser.parseFromString(str, "text/xml");
-			} else { // Internet Explorer 
-				xmlStrDoc = new ActiveXObject("Microsoft.XMLDOM");
-				xmlStrDoc.async = "false";
-				xmlStrDoc.loadXML(str);
-			}
-			$(".tzcBalance .money")[0].innerText = (TZCrebate - xmlStrDoc.getElementsByTagName('head')[0].childNodes[0].getAttribute("aa")).toFixed(2);
-			sessionStorage.setItem("tzcBalance", (TZCrebate - xmlStrDoc.getElementsByTagName('head')[0].childNodes[0].getAttribute("aa")).toFixed(2));
-		});
-	});
-	$.ajaxSettings.async  =  false;
-}
-
-
 
 //点击添加存货
 $(".addInventory")[0].addEventListener('touchstart', addInventory, false);

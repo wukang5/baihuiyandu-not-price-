@@ -271,7 +271,7 @@
 			var timeStr = JSON.parse(data);
 			var startTime = timeStr[0].startTime;
 			var endTime = timeStr[0].endTime;
-			if(time > startTime && time < endTime){
+			if(time >= startTime && time < endTime){
 //				console.log("不能对账");
 				$(".content").css({
 					display:"none"
